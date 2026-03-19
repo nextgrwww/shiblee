@@ -44,6 +44,11 @@
             fill: white;
             letter-spacing: 1.5px;
         }
+        
+        /* Cursive font for signature */
+        .signature-font {
+            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+        }
     </style>
 </head>
 <body class="font-serif selection:bg-[#B52025] selection:text-white">
@@ -62,6 +67,7 @@
         const PhoneIcon = ({className}) => <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
         const MailIcon = ({className}) => <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
         const UsersIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+        const QuoteIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/></svg>;
 
         // --- Custom SVG Logo Component ---
         const ShibleeLogo = ({ className }) => (
@@ -106,6 +112,22 @@
                     src="logo.png" 
                     alt={altText} 
                     className={`object-contain ${className}`} 
+                    onError={() => setImgFailed(true)} 
+                />
+            );
+        };
+
+        // --- Dynamic Director Image Component ---
+        const DynamicDirectorImg = ({ className }) => {
+            const [imgFailed, setImgFailed] = useState(false);
+            // Fallback to a professional Unsplash portrait to act as CDN placeholder
+            const fallbackSrc = "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&auto=format&fit=crop&w=512&q=80"; 
+            
+            return (
+                <img 
+                    src={imgFailed ? fallbackSrc : "director.png"} 
+                    alt="Zafar Ahmed Rana - Executive Director" 
+                    className={`object-cover object-top ${className}`} 
                     onError={() => setImgFailed(true)} 
                 />
             );
@@ -302,6 +324,50 @@
                             </div>
                         </section>
 
+                        {/* Executive Director Message Section */}
+                        <section id="leadership" className="py-24 px-4 bg-white border-b border-[#E2DED0]">
+                            <div className="max-w-6xl mx-auto">
+                                <FadeIn>
+                                    <div className="text-center mb-16">
+                                        <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-4 text-brandRed">Leadership</h3>
+                                        <h2 className="text-3xl md:text-4xl font-bold">Message from the Executive Director</h2>
+                                        <div className="w-16 h-px bg-brandBlue mx-auto mt-6"></div>
+                                    </div>
+                                </FadeIn>
+                                
+                                <div className="flex flex-col md:flex-row gap-12 lg:gap-20 items-center">
+                                    <FadeIn delay={200} className="w-full md:w-2/5 lg:w-1/3">
+                                        <div className="relative p-2 bg-parchment border border-[#E2DED0] shadow-md group">
+                                            <DynamicDirectorImg className="w-full aspect-[4/5] object-cover filter grayscale hover:grayscale-0 transition-all duration-700 ease-in-out" />
+                                            <div className="absolute -bottom-6 -right-6 bg-ink text-parchment p-5 shadow-lg border-l-4 border-brandRed">
+                                                <p className="font-bold text-lg whitespace-nowrap">Zafar Ahmed Rana</p>
+                                                <p className="text-xs uppercase tracking-widest opacity-80 mt-1">Executive Director</p>
+                                            </div>
+                                        </div>
+                                    </FadeIn>
+                                    
+                                    <FadeIn delay={400} className="w-full md:w-3/5 lg:w-2/3 md:pl-8">
+                                        <div className="relative">
+                                            <QuoteIcon className="absolute -top-6 -left-8 w-16 h-16 text-brandBlue opacity-10" />
+                                            <p className="text-xl text-ink/90 mb-6 leading-relaxed italic font-light">
+                                                "Welcome to Shiblee Group of Colleges. Our mission has always been to provide an environment where profound intellectual growth and robust moral character go hand in hand."
+                                            </p>
+                                            <p className="text-base text-ink/80 leading-relaxed text-justify mb-6">
+                                                In a rapidly evolving global landscape, we remain steadfast in our commitment to cultivating the leaders, thinkers, and innovators of tomorrow. Education is far more than the accumulation of facts; it is the comprehensive training of the human mind to think critically, act ethically, and contribute meaningfully to society.
+                                            </p>
+                                            <p className="text-base text-ink/80 leading-relaxed text-justify mb-10">
+                                                We firmly believe that every student possesses the innate potential to achieve greatness. Through our dedicated faculty, state-of-the-art facilities, and rigorous academic frameworks, we strive tirelessly to unlock that potential. Join us, and become an integral part of a legacy that values excellence, integrity, and the relentless pursuit of knowledge above all else.
+                                            </p>
+                                            
+                                            <div className="pt-6 border-t border-[#E2DED0] inline-block">
+                                                <span className="signature-font text-3xl text-brandBlue/90 block -rotate-2">Zafar Ahmed Rana</span>
+                                            </div>
+                                        </div>
+                                    </FadeIn>
+                                </div>
+                            </div>
+                        </section>
+
                         {/* Academics Section */}
                         <section id="academics" className="py-24 px-4 max-w-6xl mx-auto">
                             <FadeIn>
@@ -460,7 +526,7 @@
                                             <div>
                                                 <label className="block text-xs uppercase tracking-widest font-bold mb-2 text-ink/70 mt-4">Campus of Interest</label>
                                                 <select className="w-full border-b-2 border-[#E2DED0] focus:border-brandBlue bg-transparent py-2 outline-none transition-colors text-ink/80">
-                                                    <option>Faisalabad Main Campus</option>
+                                                    <option>Gujranwala Main Campus</option>
                                                     <option>Lahore Campus</option>
                                                     <option>Jaranwala Campus</option>
                                                     <option>Other / General Inquiry</option>
@@ -492,7 +558,7 @@
                                             </div>
                                             <div>
                                                 <h5 className="font-bold">Head Office & Main Campus</h5>
-                                                <p className="text-sm text-ink/70 mt-1">Gulberg Road, Faisalabad, Punjab, Pakistan.</p>
+                                                <p className="text-sm text-ink/70 mt-1">Gulberg Road, Gujranwala, Punjab, Pakistan.</p>
                                             </div>
                                         </div>
                                         
@@ -548,7 +614,7 @@
                                     </li>
                                     <li className="flex items-center hover:opacity-100 transition-opacity cursor-pointer">
                                         <BuildingIcon className="w-4 h-4 mr-3" />
-                                        Head Office, Faisalabad
+                                        Head Office, Gujranwala
                                     </li>
                                 </ul>
                             </div>
