@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiblee Group of Colleges</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React and ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    
+    <!-- Babel for in-browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        parchment: '#F9F8F4',
+                        parchmentDark: '#EAE6D9',
+                        brandBlue: '#0E4B85',
+                        brandRed: '#B52025',
+                        ink: '#2C2A25'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+        body { background-color: #F9F8F4; color: #2C2A25; overflow-x: hidden; }
+        .double-border { border-style: double; }
+        
+        /* Ribbon Text Path CSS */
+        .ribbon-text {
+            font-family: sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            fill: white;
+            letter-spacing: 1.5px;
+        }
+    </style>
+</head>
+<body class="font-serif selection:bg-[#B52025] selection:text-white">
+    
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- Inline SVG Icons ---
+        const MenuIcon = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>;
+        const XIcon = () => <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>;
+        const BookOpenIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>;
+        const GraduationCapIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.42 10.922a2 2 0 0 0-.019-3.838L12.83 4.18a2 2 0 0 0-1.66 0L2.6 7.08a2 2 0 0 0 0 3.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>;
+        const BuildingIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>;
+        const PhoneIcon = ({className}) => <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+        const MailIcon = ({className}) => <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+        const UsersIcon = ({className}) => <svg className={className} width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
+
+        // --- Custom SVG Logo Component ---
+        const ShibleeLogo = ({ className }) => (
+            <svg viewBox="0 0 300 300" className={className} xmlns="http://www.w3.org/2000/svg">
+                <defs><path id="ribbonPath" d="M 50 200 A 100 90 0 0 0 250 200" /></defs>
+                <g stroke="#0E4B85" strokeWidth="8" fill="none" strokeLinejoin="miter">
+                    <line x1="150" y1="20" x2="150" y2="120" />
+                    <polygon points="150,20 145,50 155,50" fill="#0E4B85" strokeWidth="2" />
+                    <path d="M 120 70 L 150 40" /><line x1="120" y1="70" x2="120" y2="110" />
+                    <path d="M 180 70 L 150 40" /><line x1="180" y1="70" x2="180" y2="110" />
+                    <path d="M 90 120 L 120 80" /><line x1="90" y1="120" x2="90" y2="135" />
+                    <path d="M 210 120 L 180 80" /><line x1="210" y1="120" x2="210" y2="135" />
+                </g>
+                <path d="M 80 130 Q 150 160 220 130 L 220 145 Q 150 180 80 145 Z" fill="#0E4B85" />
+                <path d="M 70 155 L 150 195 L 230 155 L 230 170 L 150 215 L 70 170 Z" fill="#B52025" />
+                <path d="M 40 180 A 110 110 0 0 0 260 180" fill="none" stroke="#B52025" strokeWidth="35" strokeLinecap="butt" />
+                <path d="M 30 170 L 15 130 L 60 145 Z" fill="#B52025" />
+                <path d="M 270 170 L 285 130 L 240 145 Z" fill="#B52025" />
+                <text className="ribbon-text">
+                    <textPath href="#ribbonPath" startOffset="50%" textAnchor="middle">SHIBLEE GROUP OF COLLEGES</textPath>
+                </text>
+                <g stroke="#0E4B85" fill="none" strokeWidth="10" strokeLinecap="square" strokeLinejoin="miter">
+                    <path d="M 110 185 L 110 245 L 150 245 L 150 170" />
+                    <line x1="130" y1="220" x2="180" y2="220" strokeWidth="8"/>
+                    <line x1="175" y1="220" x2="175" y2="185" strokeWidth="8"/>
+                    <circle cx="165" cy="190" r="5" fill="#0E4B85" stroke="none" />
+                    <circle cx="185" cy="190" r="5" fill="#0E4B85" stroke="none" />
+                    <circle cx="175" cy="175" r="5" fill="#0E4B85" stroke="none" />
+                </g>
+            </svg>
+        );
+
+        // --- Raw SVG String for Favicon Fallback ---
+        const rawSvgLogo = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"><defs><path id="ribbonPath" d="M 50 200 A 100 90 0 0 0 250 200" /></defs><g stroke="%230E4B85" stroke-width="8" fill="none"><line x1="150" y1="20" x2="150" y2="120" /><polygon points="150,20 145,50 155,50" fill="%230E4B85" /><path d="M 120 70 L 150 40" /><line x1="120" y1="70" x2="120" y2="110" /><path d="M 180 70 L 150 40" /><line x1="180" y1="70" x2="180" y2="110" /><path d="M 90 120 L 120 80" /><line x1="90" y1="120" x2="90" y2="135" /><path d="M 210 120 L 180 80" /><line x1="210" y1="120" x2="210" y2="135" /></g><path d="M 80 130 Q 150 160 220 130 L 220 145 Q 150 180 80 145 Z" fill="%230E4B85" /><path d="M 70 155 L 150 195 L 230 155 L 230 170 L 150 215 L 70 170 Z" fill="%23B52025" /><path d="M 40 180 A 110 110 0 0 0 260 180" fill="none" stroke="%23B52025" stroke-width="35" /><path d="M 30 170 L 15 130 L 60 145 Z" fill="%23B52025" /><path d="M 270 170 L 285 130 L 240 145 Z" fill="%23B52025" /><text font-family="sans-serif" font-size="13px" font-weight="bold" fill="white" letter-spacing="1.5px"><textPath href="%23ribbonPath" startOffset="50%" text-anchor="middle">SHIBLEE GROUP OF COLLEGES</textPath></text><g stroke="%230E4B85" fill="none" stroke-width="10"><path d="M 110 185 L 110 245 L 150 245 L 150 170" /><line x1="130" y1="220" x2="180" y2="220" /><line x1="175" y1="220" x2="175" y2="185" /><circle cx="165" cy="190" r="5" fill="%230E4B85" stroke="none" /><circle cx="185" cy="190" r="5" fill="%230E4B85" stroke="none" /><circle cx="175" cy="175" r="5" fill="%230E4B85" stroke="none" /></g></svg>`;
+
+        // --- Dynamic Logo Component ---
+        const DynamicLogo = ({ className, altText = "Shiblee Group Logo" }) => {
+            const [imgFailed, setImgFailed] = useState(false);
+            if (imgFailed) return <ShibleeLogo className={className} />;
+            return (
+                <img 
+                    src="logo.png" 
+                    alt={altText} 
+                    className={`object-contain ${className}`} 
+                    onError={() => setImgFailed(true)} 
+                />
+            );
+        };
+
+        // --- Animation Wrapper Component ---
+        const FadeIn = ({ children, delay = 0, className = "" }) => {
+            const [isVisible, setIsVisible] = useState(false);
+            const ref = useRef();
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(([entry]) => {
+                    if (entry.isIntersecting) {
+                        setIsVisible(true);
+                        observer.unobserve(ref.current);
+                    }
+                }, { threshold: 0.15 });
+                
+                if (ref.current) observer.observe(ref.current);
+                return () => observer.disconnect();
+            }, []);
+
+            return (
+                <div 
+                    ref={ref} 
+                    className={`transition-all duration-1000 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} ${className}`}
+                    style={{ transitionDelay: `${delay}ms` }}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        // --- Main App Component ---
+        function App() {
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const brandBlue = '#0E4B85';
+            const brandRed = '#B52025';
+
+            const handleNavClick = (e, targetId) => {
+                e.preventDefault();
+                const element = document.getElementById(targetId);
+                if (element) {
+                    const headerOffset = 96; // Accounts for the h-24 (96px) sticky header
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                    
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+                setIsMobileMenuOpen(false);
+            };
+
+            // Handle dynamic Favicon setup on load
+            useEffect(() => {
+                const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+                link.rel = 'icon';
+                const img = new Image();
+                img.src = 'logo.png';
+                img.onload = () => { 
+                    link.href = 'logo.png'; 
+                    document.head.appendChild(link); 
+                };
+                img.onerror = () => { 
+                    link.href = `data:image/svg+xml;utf8,${rawSvgLogo}`;
+                    document.head.appendChild(link);
+                };
+            }, []);
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Top Bar */}
+                    <div 
+                        className="w-full h-2 z-50 relative" 
+                        style={{ background: `linear-gradient(to right, ${brandBlue} 50%, ${brandRed} 50%)` }}
+                    ></div>
+
+                    {/* Header / Navigation */}
+                    <header className="border-b border-[#E2DED0] sticky top-0 bg-parchment/95 backdrop-blur-sm z-40">
+                        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-24">
+                                
+                                {/* Logo and Title */}
+                                <div className="flex items-center space-x-3">
+                                    <DynamicLogo className="h-16 w-16 md:h-20 md:w-20 drop-shadow-sm" />
+                                    <div className="hidden sm:block">
+                                        <h1 className="text-2xl font-bold tracking-tight uppercase" style={{ color: brandBlue }}>
+                                            Shiblee Group
+                                        </h1>
+                                        <p className="text-xs tracking-[0.2em] uppercase" style={{ color: brandRed }}>
+                                            Of Colleges
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Desktop Navigation */}
+                                <nav className="hidden md:flex space-x-8">
+                                    {['Home', 'Academics', 'Admissions', 'Heritage', 'Contact'].map((item) => (
+                                        <a 
+                                            key={item} 
+                                            href={`#${item.toLowerCase()}`}
+                                            onClick={(e) => handleNavClick(e, item.toLowerCase())}
+                                            className="text-sm font-medium tracking-widest uppercase hover:text-brandRed transition-colors border-b-2 border-transparent hover:border-brandRed py-2"
+                                        >
+                                            {item}
+                                        </a>
+                                    ))}
+                                </nav>
+
+                                {/* Mobile Menu Button */}
+                                <div className="md:hidden flex items-center">
+                                    <button 
+                                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                        className="text-ink hover:text-brandRed focus:outline-none"
+                                    >
+                                        {isMobileMenuOpen ? <XIcon /> : <MenuIcon />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Mobile Navigation */}
+                        {isMobileMenuOpen && (
+                            <div className="md:hidden bg-parchment border-t border-[#E2DED0] absolute w-full shadow-lg">
+                                <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                                    {['Home', 'Academics', 'Admissions', 'Heritage', 'Contact'].map((item) => (
+                                        <a
+                                            key={item}
+                                            href={`#${item.toLowerCase()}`}
+                                            className="block px-3 py-2 text-base font-medium uppercase tracking-widest hover:bg-[#E2DED0] hover:text-brandRed transition-colors"
+                                            onClick={(e) => handleNavClick(e, item.toLowerCase())}
+                                        >
+                                            {item}
+                                        </a>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="flex-grow">
+                        
+                        {/* Hero Section */}
+                        <section id="home" className="relative py-24 md:py-40 flex flex-col items-center text-center px-4 overflow-hidden border-b-4 double-border border-[#E2DED0] min-h-[85vh] justify-center">
+                            
+                            <div className="absolute inset-0 z-0">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+                                    alt="Classic University Campus" 
+                                    className="w-full h-full object-cover"
+                                    style={{ filter: 'sepia(40%) grayscale(20%)' }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-b from-parchment/80 via-parchment/90 to-parchment"></div>
+                            </div>
+
+                            <div className="relative z-10 flex flex-col items-center w-full max-w-4xl mx-auto">
+                                <FadeIn delay={0}>
+                                    <DynamicLogo className="w-48 h-48 md:w-56 md:h-56 mb-8 opacity-95 filter drop-shadow-md mx-auto" />
+                                </FadeIn>
+                                
+                                <FadeIn delay={200}>
+                                    <h2 className="text-4xl md:text-6xl font-bold mb-6 leading-tight text-ink" style={{ textShadow: '2px 2px 4px rgba(255,255,255,0.8)' }}>
+                                        A Tradition of <span className="italic font-light text-brandRed">Excellence</span> & Integrity
+                                    </h2>
+                                </FadeIn>
+                                
+                                <FadeIn delay={400}>
+                                    <p className="max-w-2xl text-lg md:text-xl text-ink/80 font-medium mb-12 leading-relaxed bg-parchment/50 p-4 rounded-sm backdrop-blur-sm mx-auto">
+                                        Fostering the minds of tomorrow with the timeless values of yesterday. Recognized as a premier institution dedicated to academic pursuit and character building across Pakistan.
+                                    </p>
+                                </FadeIn>
+                                
+                                <FadeIn delay={600} className="w-full">
+                                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                        <a 
+                                            href="#admissions" 
+                                            onClick={(e) => handleNavClick(e, 'admissions')}
+                                            className="px-8 py-4 border border-ink bg-ink text-parchment uppercase tracking-widest text-sm font-bold hover:bg-transparent hover:text-ink transition-all"
+                                        >
+                                            Online Admissions
+                                        </a>
+                                        <a 
+                                            href="#heritage" 
+                                            onClick={(e) => handleNavClick(e, 'heritage')}
+                                            className="px-8 py-4 border border-ink bg-parchment/80 text-ink uppercase tracking-widest text-sm font-bold hover:bg-ink hover:text-parchment transition-all backdrop-blur-sm"
+                                        >
+                                            Discover Our Legacy
+                                        </a>
+                                    </div>
+                                </FadeIn>
+                            </div>
+                        </section>
+
+                        {/* Academics Section */}
+                        <section id="academics" className="py-24 px-4 max-w-6xl mx-auto">
+                            <FadeIn>
+                                <div className="text-center mb-16">
+                                    <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-4 text-brandBlue">Faculties & Disciplines</h3>
+                                    <h2 className="text-3xl md:text-4xl font-bold">Academic Programs</h2>
+                                    <div className="w-16 h-px bg-brandRed mx-auto mt-6"></div>
+                                </div>
+                            </FadeIn>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                                {[
+                                    { title: "F.Sc Pre-Medical", icon: <BookOpenIcon className="mb-6 opacity-80" />, desc: "A rigorous foundation in Biology, Physics, and Chemistry for aspiring healthcare professionals." },
+                                    { title: "F.Sc Pre-Engineering", icon: <BuildingIcon className="mb-6 opacity-80" />, desc: "Intensive mathematical and physical sciences preparation for future innovators and builders." },
+                                    { title: "Computer Science (ICS)", icon: <GraduationCapIcon className="mb-6 opacity-80" />, desc: "Equipping students with modern computational theory, programming, and IT foundations." },
+                                    { title: "Commerce (I.Com) & Arts", icon: <UsersIcon className="mb-6 opacity-80" />, desc: "Developing business acumen, accounting skills, and profound appreciation for the humanities." },
+                                ].map((program, idx) => (
+                                    <FadeIn key={idx} delay={idx * 150} className="h-full">
+                                        <div className="h-full border border-[#E2DED0] p-8 hover:border-brandBlue transition-colors bg-white/40 cursor-default group shadow-sm hover:shadow-md flex flex-col">
+                                            <div className="text-brandBlue group-hover:text-brandRed transition-colors">
+                                                {program.icon}
+                                            </div>
+                                            <h4 className="text-xl font-bold mb-4">{program.title}</h4>
+                                            <p className="text-ink/70 leading-relaxed text-sm flex-grow">
+                                                {program.desc}
+                                            </p>
+                                        </div>
+                                    </FadeIn>
+                                ))}
+                            </div>
+                            
+                            <FadeIn delay={600}>
+                                <div className="mt-12 text-center p-8 bg-parchmentDark border border-[#D6D1C1]">
+                                    <h4 className="font-bold text-lg mb-2">Undergraduate (BS) Programs</h4>
+                                    <p className="text-sm text-ink/80 max-w-2xl mx-auto">
+                                        Shiblee Group of Colleges also offers a selection of comprehensive 4-year BS degree programs affiliated with leading national universities. 
+                                        <a href="#contact" onClick={(e) => handleNavClick(e, 'contact')} className="text-brandRed hover:underline ml-2 font-semibold">Contact us for the latest prospectus.</a>
+                                    </p>
+                                </div>
+                            </FadeIn>
+                        </section>
+
+                        {/* Admissions Section */}
+                        <section id="admissions" className="py-24 px-4 bg-white border-y border-[#E2DED0]">
+                            <div className="max-w-6xl mx-auto">
+                                <FadeIn>
+                                    <div className="text-center mb-16">
+                                        <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-4 text-brandRed">Join The Legacy</h3>
+                                        <h2 className="text-3xl md:text-4xl font-bold">Admissions & Scholarships</h2>
+                                        <div className="w-16 h-px bg-brandBlue mx-auto mt-6"></div>
+                                    </div>
+                                </FadeIn>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                                    <FadeIn delay={200}>
+                                        <h4 className="text-2xl font-bold mb-6 text-brandBlue">The Admission Process</h4>
+                                        <p className="text-ink/80 mb-6 leading-relaxed">
+                                            Admissions at Shiblee Group of Colleges are granted strictly on a merit basis in accordance with the policies set by the Board of Intermediate and Secondary Education. We welcome students who show academic promise and a desire to contribute positively to our community.
+                                        </p>
+                                        <ul className="space-y-4 mb-8">
+                                            <li className="flex items-start">
+                                                <div className="w-6 h-6 rounded-full bg-brandRed text-white flex items-center justify-center text-xs font-bold mr-4 mt-0.5 flex-shrink-0">1</div>
+                                                <span className="text-sm text-ink/80">Obtain the prospectus and admission form from your nearest campus.</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <div className="w-6 h-6 rounded-full bg-brandRed text-white flex items-center justify-center text-xs font-bold mr-4 mt-0.5 flex-shrink-0">2</div>
+                                                <span className="text-sm text-ink/80">Submit the duly filled form along with required attested documents (Matriculation result card, CNIC/B-Form, photographs).</span>
+                                            </li>
+                                            <li className="flex items-start">
+                                                <div className="w-6 h-6 rounded-full bg-brandRed text-white flex items-center justify-center text-xs font-bold mr-4 mt-0.5 flex-shrink-0">3</div>
+                                                <span className="text-sm text-ink/80">Check the merit lists displayed at the campus notice board and official website.</span>
+                                            </li>
+                                        </ul>
+                                    </FadeIn>
+                                    
+                                    <FadeIn delay={400}>
+                                        <div className="bg-parchment p-10 border-4 double-border border-[#D6D1C1]">
+                                            <h4 className="text-xl font-bold mb-4 text-center">Merit Scholarships</h4>
+                                            <p className="text-sm text-ink/80 text-center mb-8">
+                                                We believe financial constraints should never hinder true talent. Shiblee proudly offers extensive scholarships based on matriculation performance.
+                                            </p>
+                                            
+                                            <div className="space-y-3">
+                                                {[
+                                                    { grade: '95% and above', reward: '100% Fee Waiver' },
+                                                    { grade: '90% - 94%', reward: '75% Fee Waiver' },
+                                                    { grade: '85% - 89%', reward: '50% Fee Waiver' },
+                                                    { grade: '80% - 84%', reward: '25% Fee Waiver' },
+                                                ].map((tier, i) => (
+                                                    <div key={i} className="flex justify-between items-center py-2 border-b border-[#E2DED0] last:border-0">
+                                                        <span className="font-bold text-ink">{tier.grade}</span>
+                                                        <span className="text-brandBlue font-medium">{tier.reward}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </FadeIn>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Heritage Section */}
+                        <section id="heritage" className="py-24 px-4 bg-parchmentDark">
+                            <div className="max-w-4xl mx-auto text-center">
+                                <FadeIn>
+                                    <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-4 text-brandBlue">Our Story</h3>
+                                    <h2 className="text-3xl md:text-4xl font-bold mb-10">Heritage & Philosophy</h2>
+                                </FadeIn>
+
+                                <FadeIn delay={200}>
+                                    <p className="text-lg text-ink/80 mb-8 leading-relaxed text-justify">
+                                        Established with a profound vision to democratize high-quality education, Shiblee Group of Colleges has steadily grown into one of the most respected academic networks in the region. Drawing inspiration from the intellectual legacy of great scholars, the institution was founded on the belief that education is the ultimate catalyst for societal transformation.
+                                    </p>
+                                    <p className="text-lg text-ink/80 mb-12 leading-relaxed text-justify">
+                                        Over the years, we have cultivated an environment where traditional values seamlessly integrate with modern pedagogical techniques. Our campuses boast state-of-the-art laboratories, expansive libraries, and highly qualified faculties, ensuring our students are not only prepared for university examinations but are equipped to excel in the complex global landscape.
+                                    </p>
+                                </FadeIn>
+
+                                <FadeIn delay={400}>
+                                    <div className="py-10 border-y border-[#D6D1C1] mt-8">
+                                        <p className="text-2xl md:text-3xl italic leading-relaxed text-ink font-light">
+                                            "Education is not the learning of facts, but the training of the mind to think."
+                                        </p>
+                                        <div className="w-8 h-8 mx-auto mt-8 mb-4 border-t border-l border-ink transform -rotate-45"></div>
+                                        <p className="uppercase tracking-widest text-xs font-bold text-brandRed">
+                                            The Guiding Principle
+                                        </p>
+                                    </div>
+                                </FadeIn>
+                            </div>
+                        </section>
+
+                        {/* Contact Section */}
+                        <section id="contact" className="py-24 px-4 max-w-6xl mx-auto">
+                            <FadeIn>
+                                <div className="text-center mb-16">
+                                    <h3 className="text-xs uppercase tracking-[0.3em] font-bold mb-4 text-brandBlue">Get in Touch</h3>
+                                    <h2 className="text-3xl md:text-4xl font-bold">Contact Us</h2>
+                                    <div className="w-16 h-px bg-brandRed mx-auto mt-6"></div>
+                                </div>
+                            </FadeIn>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                                <FadeIn delay={200}>
+                                    <form className="bg-white p-8 border border-[#E2DED0] shadow-sm" onSubmit={(e) => e.preventDefault()}>
+                                        <h4 className="text-xl font-bold mb-6">Send an Inquiry</h4>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-xs uppercase tracking-widest font-bold mb-2 text-ink/70">Full Name</label>
+                                                <input type="text" className="w-full border-b-2 border-[#E2DED0] focus:border-brandBlue bg-transparent py-2 outline-none transition-colors" placeholder="John Doe" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs uppercase tracking-widest font-bold mb-2 text-ink/70 mt-4">Email Address</label>
+                                                <input type="email" className="w-full border-b-2 border-[#E2DED0] focus:border-brandBlue bg-transparent py-2 outline-none transition-colors" placeholder="john@example.com" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs uppercase tracking-widest font-bold mb-2 text-ink/70 mt-4">Campus of Interest</label>
+                                                <select className="w-full border-b-2 border-[#E2DED0] focus:border-brandBlue bg-transparent py-2 outline-none transition-colors text-ink/80">
+                                                    <option>Faisalabad Main Campus</option>
+                                                    <option>Lahore Campus</option>
+                                                    <option>Jaranwala Campus</option>
+                                                    <option>Other / General Inquiry</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs uppercase tracking-widest font-bold mb-2 text-ink/70 mt-4">Message</label>
+                                                <textarea rows="4" className="w-full border-2 border-[#E2DED0] focus:border-brandBlue bg-transparent p-2 outline-none transition-colors resize-none mt-2" placeholder="How can we assist you?"></textarea>
+                                            </div>
+                                            <button className="w-full bg-ink text-parchment uppercase tracking-widest text-sm font-bold py-4 mt-6 hover:bg-brandRed transition-colors">
+                                                Submit Message
+                                            </button>
+                                        </div>
+                                    </form>
+                                </FadeIn>
+
+                                <FadeIn delay={400} className="flex flex-col justify-center space-y-8">
+                                    <div>
+                                        <h4 className="text-xl font-bold mb-4 text-brandBlue">Campuses & Offices</h4>
+                                        <p className="text-ink/80 mb-6 text-sm leading-relaxed">
+                                            Shiblee Group of Colleges operates multiple purpose-built campuses equipped with modern facilities. Visit us during administrative hours (8:00 AM - 4:00 PM) from Monday to Saturday.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <div className="flex items-start">
+                                            <div className="bg-white p-3 border border-[#E2DED0] mr-4 text-brandRed">
+                                                <BuildingIcon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold">Head Office & Main Campus</h5>
+                                                <p className="text-sm text-ink/70 mt-1">Gulberg Road, Faisalabad, Punjab, Pakistan.</p>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex items-start">
+                                            <div className="bg-white p-3 border border-[#E2DED0] mr-4 text-brandBlue">
+                                                <PhoneIcon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold">Contact Numbers</h5>
+                                                <p className="text-sm text-ink/70 mt-1">UAN: 111-SHIBLEE (744-253)<br/>Tel: +92 41 8731111</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start">
+                                            <div className="bg-white p-3 border border-[#E2DED0] mr-4 text-brandRed">
+                                                <MailIcon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold">Digital Correspondence</h5>
+                                                <p className="text-sm text-ink/70 mt-1">Admissions: apply@shibleecolleges.edu.pk<br/>Info: info@shibleecolleges.edu.pk</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </FadeIn>
+                            </div>
+                        </section>
+
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-ink text-parchmentDark py-16 px-4 border-t-4 border-brandRed">
+                        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+                            
+                            <div>
+                                <DynamicLogo className="h-20 w-auto mb-6 filter brightness-0 invert opacity-80" altText="Shiblee Group Logo White" />
+                                <p className="text-sm leading-loose opacity-70">
+                                    Shiblee Group of Colleges<br/>
+                                    A legacy of academic distinction.<br/>
+                                    Est. in pursuit of knowledge.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs uppercase tracking-widest font-bold mb-6 text-brandRed">Inquiries</h4>
+                                <ul className="space-y-4 text-sm opacity-70">
+                                    <li className="flex items-center hover:opacity-100 transition-opacity cursor-pointer">
+                                        <PhoneIcon className="mr-3" />
+                                        111-744-253
+                                    </li>
+                                    <li className="flex items-center hover:opacity-100 transition-opacity cursor-pointer">
+                                        <MailIcon className="mr-3" />
+                                        info@shibleecolleges.edu.pk
+                                    </li>
+                                    <li className="flex items-center hover:opacity-100 transition-opacity cursor-pointer">
+                                        <BuildingIcon className="w-4 h-4 mr-3" />
+                                        Head Office, Faisalabad
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs uppercase tracking-widest font-bold mb-6 text-brandBlue">Quick Links</h4>
+                                <ul className="space-y-2 text-sm opacity-70">
+                                    {['Academic Calendar', 'Download Prospectus', 'Student Portal', 'Alumni Association', 'Careers'].map(link => (
+                                        <li key={link}>
+                                            <a href="#" className="hover:text-white transition-colors">{link}</a>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
+                        </div>
+                        
+                        <div className="max-w-6xl mx-auto mt-16 pt-8 border-t border-white/10 text-xs text-center opacity-40 uppercase tracking-widest">
+                            &copy; {new Date().getFullYear()} Shiblee Group of Colleges. All rights reserved.
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
